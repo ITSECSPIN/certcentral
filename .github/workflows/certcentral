@@ -1,0 +1,46 @@
+
+name: Rename and recreate dos file
+
+on:
+  workflow_dispatch: # Manual trigger
+  schedule:
+    - cron: "0 0 * * *" # Daily at midnight UTC
+
+permissions:
+  contents: write # ✅ Allow pushing changes
+
+jobs:
+  rename-dos:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }} # ✅ Use GitHub token for push
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+      - name: Rename old dos file
+        run: |
+          if [ -f dos ]; then
+            TIMESTAMP=$(date +"%Y%m%d%H%M%S")
+            mv dos "dos.${TIMESTAMP}"
+            echo "Renamed dos to dos.${TIMESTAMP}"
+          else
+            echo "No existing dos file found."
+          fi
+
+      - name: Create new dos file
+        run: |
+          echo "New dos file created on $(date)" > dos
+          echo "Created new dos file."
+
+      - name: Commit and push changes
+        run: |
+          git add .
+          git commit -m "Renamed old dos and created new dos"
+          git push origin main
