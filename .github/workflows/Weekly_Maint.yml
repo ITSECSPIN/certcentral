@@ -2,7 +2,7 @@
 name: Cleanup old dos backups
 
 on:
-  workflow_dispatch: # Manual trigger
+  workflow_dispatch:
   schedule:
     - cron: "0 1 * * *" # Runs daily at 01:00 UTC
 
@@ -26,10 +26,13 @@ jobs:
 
       - name: Delete old backups (keep last 5)
         run: |
-          # Find all files matching dos.<timestamp> (exclude main dos)
-          if ls dos.* 1> /dev/null 2>&1; then
-            echo "Found backup files. Cleaning up..."
-            FILES=$(ls -1 dos.* | sort -r)
+          # Check if any backup files exist
+          BACKUPS=$(ls -1 dos.* 2>/dev/null || true)
+          if [ -z "$BACKUPS" ]; then
+            echo "No backup files found. Skipping cleanup."
+          else
+            echo "Found backups: $BACKUPS"
+            FILES=$(echo "$BACKUPS" | sort -r)
             COUNT=0
             for FILE in $FILES; do
               COUNT=$((COUNT+1))
@@ -38,8 +41,6 @@ jobs:
                 rm "$FILE"
               fi
             done
-          else
-            echo "No backup files found. Skipping cleanup."
           fi
 
       - name: Commit and push changes
