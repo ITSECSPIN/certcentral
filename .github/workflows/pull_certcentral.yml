@@ -1,0 +1,36 @@
+
+name: Update dos file from CertCentral
+
+on:
+  workflow_dispatch: # Manual trigger
+  schedule:
+    - cron: "0 1 * * *" # Runs daily at 01:00 UTC
+
+permissions:
+  contents: write
+
+jobs:
+  update-dos:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+      - name: Download CSV from CertCentral
+        run: |
+          curl -s -o dos https://certcentral.org/api/download_csv
+          echo "Downloaded latest CSV from CertCentral into dos"
+
+      - name: Commit and push changes
+        run: |
+          git add dos
+          git commit -m "Updated dos file from CertCentral API"
+          git push origin main
