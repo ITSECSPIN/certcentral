@@ -4,7 +4,7 @@ name: Update dos file from CertCentral
 on:
   workflow_dispatch: # Manual trigger
   schedule:
-    - cron: "0 1 * * *" # Runs daily at 01:00 UTC
+    - cron: "5 0 * * *" # Runs daily at 00:05 UTC
 
 permissions:
   contents: write
