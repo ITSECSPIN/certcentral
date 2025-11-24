@@ -2,10 +2,9 @@
 name: Rename and recreate dos file
 
 on:
+  workflow_dispatch: # Allows manual trigger from Actions tab
   schedule:
-    # Runs every 24 hours
-    - cron: "0 0 * * *"
-  workflow_dispatch: # Allow manual trigger
+    - cron: "0 0 * * *" # Still runs daily at midnight UTC
 
 jobs:
   rename-dos:
