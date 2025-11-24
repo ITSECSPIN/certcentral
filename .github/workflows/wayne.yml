@@ -1,0 +1,41 @@
+
+name: Rename dos file only
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  rename-dos:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+      - name: Rename old dos file
+        run: |
+          if [ -f dos ]; then
+            TIMESTAMP=$(date +"%Y%m%d%H%M%S")
+            mv dos "dos.${TIMESTAMP}"
+            echo "Renamed dos to dos.${TIMESTAMP}"
+          else
+            echo "No existing dos file found."
+          fi
+
+      - name: Commit and push changes
+        run: |
+          git add .
+          git commit -m "Renamed dos to dos.<timestamp>"
+          git push origin main
