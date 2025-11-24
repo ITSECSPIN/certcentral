@@ -1,8 +1,8 @@
 
-name: Cleanup old dos backups
+name: Delete all dos.* backups (keep main dos)
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: # Manual trigger
   schedule:
     - cron: "0 1 * * *" # Runs daily at 01:00 UTC
 
@@ -24,27 +24,18 @@ jobs:
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
 
-      - name: Delete old backups (keep last 5)
+      - name: Delete all dos.* files (keep dos)
         run: |
-          # Check if any backup files exist
-          BACKUPS=$(ls -1 dos.* 2>/dev/null || true)
-          if [ -z "$BACKUPS" ]; then
-            echo "No backup files found. Skipping cleanup."
+          # Delete all files starting with dos. (exclude main dos)
+          if ls dos.* 1> /dev/null 2>&1; then
+            echo "Deleting all dos.* backup files..."
+            rm dos.*
           else
-            echo "Found backups: $BACKUPS"
-            FILES=$(echo "$BACKUPS" | sort -r)
-            COUNT=0
-            for FILE in $FILES; do
-              COUNT=$((COUNT+1))
-              if [ $COUNT -gt 5 ]; then
-                echo "Deleting old backup: $FILE"
-                rm "$FILE"
-              fi
-            done
+            echo "No backup files found."
           fi
 
       - name: Commit and push changes
         run: |
           git add .
-          git commit -m "Cleaned old dos backups (kept last 5)"
+          git commit -m "Deleted all dos.* backup files (kept main dos)"
           git push origin main
